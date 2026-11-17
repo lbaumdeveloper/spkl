@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/lbaumdeveloper/SparkleXrm/master/docs/spkl.schema.json",
+  "$schema": "https://raw.githubusercontent.com/lbaumdeveloper/spkl/main/docs/spkl.schema.json",
   "plugins": [
     {
       "profile": "default,plugins",

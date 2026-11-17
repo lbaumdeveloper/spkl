@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/lbaumdeveloper/SparkleXrm/master/docs/spkl.schema.json",
+  "$id": "https://raw.githubusercontent.com/lbaumdeveloper/spkl/main/docs/spkl.schema.json",
   "title": "spkl.json",
   "description": "Configuration for the spkl deployment task runner. Paths are relative to the folder that contains this file.",
   "type": "object",
