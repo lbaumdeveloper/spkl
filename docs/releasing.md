@@ -18,10 +18,10 @@ Create an empty project on the GitLab server, e.g. `tooling/spkl`, and push this
 
 ```powershell
 git remote add gitlab https://<gitlab>/tooling/spkl.git
-git push gitlab master
+git push gitlab main
 ```
 
-Repeat `git push gitlab master` (and the tags, see below) whenever GitHub has changes you want to release. Alternatively set up repository mirroring in GitLab, if your GitLab edition offers it.
+Repeat `git push gitlab main` (and the tags, see below) whenever GitHub has changes you want to release. Alternatively set up repository mirroring in GitLab, if your GitLab edition offers it.
 
 Make sure the project's package registry is enabled (in the project settings under visibility / project features; the exact menu names depend on the GitLab version).
 
@@ -55,24 +55,9 @@ The tag pipeline:
 
 Check the project's package registry (**Deploy → Package registry** in recent GitLab versions): `Spkl.OnPrem`, `Spkl.OnPrem.Attributes` and `Spkl.OnPrem.Templates` should be listed with `1.0.0`.
 
-### 4. Set up each developer machine
+### 4. Set up developer machines and solution pipelines
 
-Every developer adds the registry once, with a GitLab personal access token that has the `read_api` scope:
-
-```powershell
-dotnet nuget add source "https://<gitlab>/api/v4/projects/<project id>/packages/nuget/index.json" `
-  --name spkl --username <gitlab user> --password <token>
-```
-
-Without `--store-password-in-clear-text`, `dotnet nuget add source` stores the password encrypted, which only works on Windows. That's fine here, because the team is on Windows.
-
-Then install the template:
-
-```powershell
-dotnet new install Spkl.OnPrem.Templates
-```
-
-Visual Studio uses the same NuGet sources, so restoring `Tooling` and the plugin projects works there too.
+See [NuGet feed on GitLab](nuget-feed.md): the feed URL, a token per developer, `nuget.config` in the solution repositories and restoring in their CI pipelines.
 
 ## Releasing an update
 
@@ -95,10 +80,10 @@ Merge the change on GitHub as usual. GitHub CI builds a solution from the templa
 ### 2. Tag and push to GitLab
 
 ```powershell
-git checkout master
+git checkout main
 git pull
 git tag v1.0.1
-git push gitlab master v1.0.1
+git push gitlab main v1.0.1
 ```
 
 A version can be published only once. To fix a broken release, raise the version again; don't move the tag.

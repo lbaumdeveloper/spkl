@@ -16,19 +16,23 @@ The ids differ from the original `spkl` package on nuget.org on purpose, so rest
 
 ## 1. Create the solution
 
+The packages come from the private GitLab feed. Set up your machine once as described in [NuGet feed on GitLab](nuget-feed.md#developer-machines).
+
 ```powershell
 dotnet new install Spkl.OnPrem.Templates
-dotnet new spkl-solution -n Contoso --SolutionUniqueName ContosoCore
+dotnet new spkl-solution -n Contoso --SolutionUniqueName ContosoCore `
+  --FeedUrl "https://<gitlab>/api/v4/projects/<project id>/packages/nuget/index.json"
 cd Contoso
 .\Tooling\New-SigningKey.ps1
 ```
 
-`-n` names the folder, the `.sln` and the assemblies (`Contoso.Plugins.dll`, …). `--SolutionUniqueName` is the Dynamics 365 solution spkl deploys into; it is required, because spkl never deploys to the default solution.
+`-n` names the folder, the `.sln` and the assemblies (`Contoso.Plugins.dll`, …). `--SolutionUniqueName` is the Dynamics 365 solution spkl deploys into; it is required, because spkl never deploys to the default solution. `--FeedUrl` is the GitLab NuGet feed; it goes into `nuget.config`, without credentials.
 
 ```
 Contoso/
 ├── Contoso.sln
 ├── Directory.Build.props        ← output to bin\Debug, signs with Tooling\key.snk
+├── nuget.config                 ← nuget.org + the GitLab feed, no credentials
 ├── .vscode/tasks.json           ← VS Code commands (step 3)
 ├── Tooling/                     ← the only project that references Spkl.OnPrem
 │   ├── spkl.json                ← all deployment config for the solution
@@ -61,7 +65,7 @@ All paths in `spkl.json` are relative to the folder that contains `spkl.json`, w
 
 Without the template:
 
-1. Copy `Tooling\spkl.json`, `Tooling\spkl.ps1`, `Tooling\New-SigningKey.ps1` and `.vscode\tasks.json` from [`templates/solution`](../templates/solution) and replace `Contoso` and `<SolutionUniqueName>`.
+1. Copy `nuget.config`, `Tooling\spkl.json`, `Tooling\spkl.ps1`, `Tooling\New-SigningKey.ps1` and `.vscode\tasks.json` from [`templates/solution`](../templates/solution) and replace `__FeedUrl__`, `Contoso` and `<SolutionUniqueName>`.
 2. Install `Spkl.OnPrem` into one project only, e.g. `Tooling`.
 3. Install `Spkl.OnPrem.Attributes` into every plugin and workflow project. With `packages.config` the file is added to the project; with PackageReference it is compiled in without appearing in the project.
 4. Make sure the plugin assemblies are signed and `assemblypath` in `spkl.json` points to the built DLLs.
@@ -125,6 +129,10 @@ $env:SPKL_CONNECTION = "AuthType=ClientSecret;Url=https://contoso.crm4.dynamics.
 Never commit connection strings. `-Connection` on `spkl.ps1` overrides the environment variable.
 
 Use `-Task whoami` to check which environment and user you are connected as.
+
+## CI pipelines
+
+Restoring in the GitLab pipeline of a solution repository is described in [NuGet feed on GitLab](nuget-feed.md#ci-of-solution-repositories).
 
 ## Releasing the packages
 

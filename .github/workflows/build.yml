@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -31,12 +31,11 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           dotnet new install (Get-ChildItem "$env:RUNNER_TEMP\packages\Spkl.OnPrem.Templates.*.nupkg" | Select-Object -First 1).FullName
-          dotnet new spkl-solution -n Fabrikam -o Fabrikam --SolutionUniqueName ContosoCore --allow-scripts no
+          dotnet new spkl-solution -n Fabrikam -o Fabrikam --SolutionUniqueName ContosoCore --FeedUrl "$env:RUNNER_TEMP\packages" --allow-scripts no
           cd Fabrikam
           pwsh -NoProfile -File Tooling\New-SigningKey.ps1
           if (Select-String -Path Tooling\spkl.json -Pattern '<SolutionUniqueName>' -SimpleMatch) { throw 'SolutionUniqueName was not replaced' }
-          dotnet new nugetconfig
-          dotnet nuget add source "$env:RUNNER_TEMP\packages" --name local --configfile nuget.config
+          if (Select-String -Path nuget.config -Pattern '__FeedUrl__' -SimpleMatch) { throw 'FeedUrl was not replaced' }
           dotnet build Fabrikam.sln
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $packages = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE '.nuget\packages' }

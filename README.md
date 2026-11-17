@@ -12,6 +12,7 @@ This repository contains only spkl. The original SparkleXrm framework, UI compon
 | [Commands](docs/commands.md) | You want to know what a task does, what it reads and what it changes or deletes. |
 | [spkl.json reference](docs/spkl-json.md) | Writing or debugging `spkl.json`: every option, paths and profiles. |
 | [Releasing](docs/releasing.md) | Publishing the packages on the private GitLab, first version and updates. |
+| [NuGet feed on GitLab](docs/nuget-feed.md) | Adding the GitLab feed on developer machines and restoring from it in the CI of solution repositories. |
 | [Registration attributes](docs/registration-attributes.md) | Registering plugin steps, images, Custom APIs and workflow activities in code. |
 
 The solution template is in [`templates/solution`](templates/solution).
