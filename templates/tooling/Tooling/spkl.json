@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/lbaumdeveloper/SparkleXrm/master/docs/spkl.schema.json",
+  "plugins": [
+    {
+      "profile": "default,plugins",
+      "solution": "<SolutionUniqueName>",
+      "assemblypath": "..\\<PluginProjectFolder>\\bin\\Debug\\<PluginAssembly>.dll"
+    }
+  ],
+  "webresources": [
+    {
+      "profile": "default",
+      "solution": "<SolutionUniqueName>",
+      "root": "..\\Webresources\\",
+      "autodetect": "yes"
+    }
+  ]
+}

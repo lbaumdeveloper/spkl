@@ -24,7 +24,7 @@ Switches:
 | `/i` | With `/l`: ignore the logged-in Windows user and ask for credentials. |
 | `/?` | Show the help. |
 
-With `Tooling\spkl.ps1` you only pass `-Task`, `-Profile` and optionally `-Connection`, `-Path` or `-DryRun`; it fills in the rest.
+With `Tooling\spkl.ps1` you only pass `-Task`, `-Profile` and optionally `-Connection`, `-Path`, `-DryRun`, `-Prefix` (`/s:`) or `-Overwrite` (`/o`); it fills in the rest.
 
 ### Dry run
 
@@ -98,13 +98,13 @@ Scans `webresources[].root` (and its sub-folders) for `*.js, *.htm, *.html, *.cs
 
 ### `instrument`
 
-Reads the registrations from the environment and writes matching `[CrmPluginRegistration]` attributes into your `.cs` files. Use it once to move an existing, manually registered project to spkl. It scans `*.cs` files under `path`, so run it against the plugin project:
+Reads the registrations from the environment and writes matching `[CrmPluginRegistration]` attributes into your `.cs` files. Use it once to move an existing, manually registered project to spkl; see [existing solution](existing-solution.md). It scans `*.cs` files under `path`, so run it against the plugin project:
 
 ```powershell
 .\Tooling\spkl.ps1 -Task instrument -Path .\Plugins
 ```
 
-A `.bak` copy of every changed file is written next to it.
+A `.bak` copy of every changed file is written next to it. Step attributes include the registered step `Id`. `instrument` does not create or change `spkl.json`; it only reads `classRegex` from a `spkl.json` in `path` if there is one. Files with CRLF and LF line endings are both supported.
 
 ### `earlybound`
 

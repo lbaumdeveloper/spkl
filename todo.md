@@ -29,6 +29,7 @@
 - [x] Ship `CrmPluginRegistrationAttribute` as a source-only NuGet package (`Spkl.OnPrem.Attributes`)
 - [x] CI pipeline: build and run the `SparkleXrm.Tasks.Tests` unit tests
 - [x] `dotnet new` solution template (Webresources, Plugins, Actions, Workflows, Helper, Tooling)
+- [x] `dotnet new spkl-tooling` and a migration guide for existing solutions; `instrument` no longer writes `spkl.json` and supports LF files
 - [x] Update NuGet metadata (ids `Spkl.OnPrem*`, authors, project URL, MIT license expression)
 - [x] Package icon
 - [x] `build/Pack.ps1` packs all three packages; `.gitlab-ci.yml` publishes them on the private GitLab (never from GitHub)
