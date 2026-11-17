@@ -12,8 +12,8 @@ This repository contains only spkl. The original SparkleXrm framework, UI compon
 | [Existing solution](docs/existing-solution.md) | Adding spkl to a solution whose plugins, workflows and web resources are already registered in an environment. |
 | [Commands](docs/commands.md) | You want to know what a task does, what it reads and what it changes or deletes. |
 | [spkl.json reference](docs/spkl-json.md) | Writing or debugging `spkl.json`: every option, paths and profiles. |
-| [Releasing](docs/releasing.md) | Publishing the packages on the private GitLab, first version and updates. |
-| [NuGet feed on GitLab](docs/nuget-feed.md) | Adding the GitLab feed on developer machines and restoring from it in the CI of solution repositories. |
+| [Releasing](docs/releasing.md) | Publishing the packages to GitHub Packages and the private GitLab in parallel, first version and updates. |
+| [NuGet feeds](docs/nuget-feed.md) | Adding the GitLab or GitHub feed on developer machines and restoring from it in the CI of solution repositories. |
 | [Registration attributes](docs/registration-attributes.md) | Registering plugin steps, images, Custom APIs and workflow activities in code. |
 
 The templates are in [`templates`](templates): `spkl-solution` for a new solution, `spkl-tooling` for an existing one.
@@ -22,7 +22,7 @@ The templates are in [`templates`](templates): `spkl-solution` for a new solutio
 
 ```powershell
 dotnet new install Spkl.OnPrem.Templates
-dotnet new spkl-solution -n Contoso --SolutionUniqueName ContosoCore --FeedUrl "<GitLab NuGet feed>"
+dotnet new spkl-solution -n Contoso --SolutionUniqueName ContosoCore --FeedUrl "<GitLab or GitHub NuGet feed>"
 cd Contoso; .\Tooling\New-SigningKey.ps1
 .\Tooling\spkl.ps1 -Task plugins               # deploy plugins (after building)
 .\Tooling\spkl.ps1 -Task webresources          # deploy web resources
@@ -31,7 +31,7 @@ cd Contoso; .\Tooling\New-SigningKey.ps1
 Existing solution with components already registered:
 
 ```powershell
-dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "<GitLab NuGet feed>"
+dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "<GitLab or GitHub NuGet feed>"
 .\Tooling\spkl.ps1 -Task instrument -Path .\Contoso.Plugins   # attributes from the registered steps
 .\Tooling\spkl.ps1 -Task plugins -DryRun                      # expect updates only
 ```

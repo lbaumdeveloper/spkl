@@ -16,7 +16,7 @@ The ids differ from the original `spkl` package on nuget.org on purpose, so rest
 
 ## 1. Create the solution
 
-The packages come from the private GitLab feed. Set up your machine once as described in [NuGet feed on GitLab](nuget-feed.md#developer-machines).
+The packages come from the GitLab or the GitHub feed. Set up your machine once as described in [NuGet feeds](nuget-feed.md#developer-machines).
 
 ```powershell
 dotnet new install Spkl.OnPrem.Templates
@@ -26,13 +26,13 @@ cd Contoso
 .\Tooling\New-SigningKey.ps1
 ```
 
-`-n` names the folder, the `.sln` and the assemblies (`Contoso.Plugins.dll`, …). `--SolutionUniqueName` is the Dynamics 365 solution spkl deploys into; it is required, because spkl never deploys to the default solution. `--FeedUrl` is the GitLab NuGet feed; it goes into `nuget.config`, without credentials.
+`-n` names the folder, the `.sln` and the assemblies (`Contoso.Plugins.dll`, …). `--SolutionUniqueName` is the Dynamics 365 solution spkl deploys into; it is required, because spkl never deploys to the default solution. `--FeedUrl` is the [NuGet feed](nuget-feed.md#feed-urls) of the spkl packages; it goes into `nuget.config`, without credentials.
 
 ```
 Contoso/
 ├── Contoso.sln
 ├── Directory.Build.props        ← output to bin\Debug, signs with Tooling\key.snk
-├── nuget.config                 ← nuget.org + the GitLab feed, no credentials
+├── nuget.config                 ← nuget.org + the spkl feed, no credentials
 ├── .vscode/tasks.json           ← VS Code commands (step 3)
 ├── Tooling/                     ← the only project that references Spkl.OnPrem
 │   ├── spkl.json                ← all deployment config for the solution
@@ -127,8 +127,8 @@ Use `-Task whoami` to check which environment and user you are connected as.
 
 ## CI pipelines
 
-Restoring in the GitLab pipeline of a solution repository is described in [NuGet feed on GitLab](nuget-feed.md#ci-of-solution-repositories).
+Restoring in the GitLab or GitHub pipeline of a solution repository is described in [NuGet feeds](nuget-feed.md#ci-of-solution-repositories).
 
 ## Releasing the packages
 
-See [releasing](releasing.md): first-time setup of the private GitLab, publishing the first version and updates.
+See [releasing](releasing.md): first-time setup of GitHub and the private GitLab, publishing the first version and updates.

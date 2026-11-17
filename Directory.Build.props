@@ -4,8 +4,8 @@
     <Version>1.0.0</Version>
     <Authors>Scott Durow, lbaumdeveloper</Authors>
     <Copyright>Copyright (c) Scott Durow and contributors</Copyright>
-    <PackageProjectUrl>https://github.com/lbaumdeveloper/SparkleXrm</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/lbaumdeveloper/SparkleXrm</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/lbaumdeveloper/spkl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lbaumdeveloper/spkl</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>dynamics-crm;dynamics-365;on-premises;spkl;plugins;deployment</PackageTags>

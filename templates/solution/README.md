@@ -1,6 +1,6 @@
 # Contoso
 
-Dynamics 365 solution deployed with [spkl](https://github.com/lbaumdeveloper/SparkleXrm).
+Dynamics 365 solution deployed with [spkl](https://github.com/lbaumdeveloper/spkl).
 
 | Project | Purpose |
 |---|---|
@@ -20,4 +20,4 @@ Build first, then deploy:
 
 In VS Code use **Tasks: Run Task → spkl: …**. Set `$env:SPKL_CONNECTION` to skip the login prompt.
 
-`nuget.config` restores `Spkl.OnPrem*` from the GitLab feed. It holds no credentials: each developer stores a GitLab token in their user-level NuGet config under the source name `spkl`, and CI sets `NuGetPackageSourceCredentials_spkl` from `CI_JOB_TOKEN`. See [NuGet feed on GitLab](https://github.com/lbaumdeveloper/SparkleXrm/blob/main/docs/nuget-feed.md).
+`nuget.config` restores `Spkl.OnPrem*` from the spkl feed on GitLab or GitHub. It holds no credentials: each developer stores a token in their user-level NuGet config under the source name `spkl`, and CI sets `NuGetPackageSourceCredentials_spkl` from `CI_JOB_TOKEN` (GitLab) or `GITHUB_TOKEN` (GitHub). See [NuGet feeds](https://github.com/lbaumdeveloper/spkl/blob/main/docs/nuget-feed.md).

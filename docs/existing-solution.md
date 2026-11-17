@@ -24,7 +24,7 @@ Two rules follow from the table:
 
 ## 1. Add the Tooling
 
-Run the `spkl-tooling` template in the folder that contains the `.sln`. Set up the GitLab feed on your machine first, see [NuGet feed on GitLab](nuget-feed.md#developer-machines).
+Run the `spkl-tooling` template in the folder that contains the `.sln`. Set up the feed on your machine first, see [NuGet feeds](nuget-feed.md#developer-machines).
 
 ```powershell
 dotnet new install Spkl.OnPrem.Templates
@@ -37,7 +37,7 @@ It creates:
 
 ```
 Contoso/
-├── nuget.config          ← nuget.org + the GitLab feed, no credentials
+├── nuget.config          ← nuget.org + the spkl feed, no credentials
 ├── .vscode/tasks.json    ← VS Code commands
 └── Tooling/
     ├── Tooling.csproj    ← references Spkl.OnPrem, added to the .sln
@@ -167,4 +167,4 @@ When the dry run looks right, deploy without `-DryRun`. From now on the attribut
 - Add `*.bak` to `.gitignore`.
 - Commit `Tooling/`, `nuget.config`, `.vscode/tasks.json` and the changed `.cs` files.
 - Set up Visual Studio External Tools and connections as described in [getting started](getting-started.md#3-run-commands).
-- For CI restores from the GitLab feed, see [NuGet feed on GitLab](nuget-feed.md#ci-of-solution-repositories).
+- For CI restores on GitLab or GitHub, see [NuGet feeds](nuget-feed.md#ci-of-solution-repositories).

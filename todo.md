@@ -32,5 +32,7 @@
 - [x] `dotnet new spkl-tooling` and a migration guide for existing solutions; `instrument` no longer writes `spkl.json` and supports LF files
 - [x] Update NuGet metadata (ids `Spkl.OnPrem*`, authors, project URL, MIT license expression)
 - [x] Package icon
-- [x] `build/Pack.ps1` packs all three packages; `.gitlab-ci.yml` publishes them on the private GitLab (never from GitHub)
-- [ ] Mirror the repo to the private GitLab, register a Windows runner and publish the first version
+- [x] `build/Pack.ps1` packs all three packages; `.gitlab-ci.yml` publishes them on the private GitLab
+- [x] `.github/workflows/build.yml` publishes them to GitHub Packages and the GitHub release on the same tag
+- [ ] Add the GitLab push URL to `origin`, register a GitLab Windows runner and publish the first version to both feeds
+- [ ] Check the visibility of the packages on GitHub after the first release
