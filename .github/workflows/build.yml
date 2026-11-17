@@ -64,7 +64,7 @@ jobs:
           if (Select-String -Path Tooling\spkl.json -Pattern '<SolutionUniqueName>' -SimpleMatch) { throw 'SolutionUniqueName was not replaced' }
           if (Select-String -Path nuget.config -Pattern '__FeedUrl__' -SimpleMatch) { throw 'FeedUrl was not replaced' }
           if (-not (dotnet sln list | Select-String 'Tooling.csproj' -SimpleMatch)) { throw 'Tooling was not added to the solution' }
-          dotnet build Existing.sln
+          dotnet build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cd ..
           New-Item -ItemType Directory NoExtras | Out-Null
