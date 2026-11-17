@@ -8,24 +8,60 @@ spkl ships as three NuGet packages with the same version:
 | `Spkl.OnPrem.Attributes` | `Plugins`, `Actions`, `Workflows`: `CrmPluginRegistrationAttribute.cs` |
 | `Spkl.OnPrem.Templates` | `dotnet new spkl-solution` |
 
-They are **never published from GitHub**. GitHub only builds and tests them. Publishing runs on the private GitLab server through `.gitlab-ci.yml`, into that GitLab project's NuGet package registry.
+Both platforms publish the same packages from the same tag:
+
+| Platform | Pipeline | Feed | Runner |
+|---|---|---|---|
+| GitHub | `.github/workflows/build.yml` | GitHub Packages of the repository owner, plus the `.nupkg` files on the GitHub release | `windows-latest`, or the runner in the repository variable `SPKL_RUNS_ON` |
+| GitLab | `.gitlab-ci.yml` | NuGet package registry of the GitLab project | Windows shell runner with the tag in `SPKL_RUNNER_TAG` |
+
+Both pipelines build and test on every push and publish only on a tag `v<Version>`. Neither needs a stored secret: GitHub pushes with `GITHUB_TOKEN`, GitLab with `CI_JOB_TOKEN`.
+
+GitHub is the main repository: pull requests and reviews happen there. GitLab gets a copy of `main` and the tags. Which feed a solution restores from is described in [NuGet feeds](nuget-feed.md).
 
 ## First-time setup
 
-### 1. Put the repository on GitLab
+### 1. One clone that pushes to both
 
-Create an empty project on the GitLab server, e.g. `tooling/spkl`, and push this repository to it as a second remote:
+Give `origin` a second push URL. `git fetch` and `git pull` keep using GitHub, `git push origin …` goes to GitHub and GitLab:
 
 ```powershell
-git remote add gitlab https://<gitlab>/tooling/spkl.git
-git push gitlab main
+git remote set-url --add --push origin https://github.com/lbaumdeveloper/spkl.git
+git remote set-url --add --push origin https://<gitlab>/tooling/spkl.git
+git remote -v
 ```
 
-Repeat `git push gitlab main` (and the tags, see below) whenever GitHub has changes you want to release. Alternatively set up repository mirroring in GitLab, if your GitLab edition offers it.
+`git remote -v` should list one fetch URL (GitHub) and two push URLs. The first `--add --push` is needed, because once a push URL is set, the fetch URL is no longer used for pushing.
+
+Pull requests are merged on GitHub, so GitLab only gets the merge commit when someone pushes `main` again:
+
+```powershell
+git checkout main
+git pull
+git push origin main
+```
+
+If a push to one of them fails, git still pushes to the other. Fix the cause and push again; pushing what is already there is a no-op.
+
+Alternatively let GitLab pull from GitHub with repository mirroring, if your GitLab edition offers pull mirroring. Enable **Trigger pipelines for mirror updates**, otherwise tags arriving through the mirror don't publish.
+
+### 2. GitHub
+
+Nothing to configure for `windows-latest`. The publish job asks for `packages: write` and `contents: write` itself.
+
+- After the first tag, the three packages appear under **Packages** on the owner's profile and on the repository page. They are linked to the repository through `RepositoryUrl` in `Directory.Build.props`, which must point to this repository.
+- GitHub creates a new package as **private**, even if the repository is public. To make it public: package page → **Package settings → Change visibility**, for each of the three packages. Restoring still needs a token, see [NuGet feeds](nuget-feed.md#github-packages).
+- The `.nupkg` files on the GitHub release can be downloaded without a token, e.g. to put them on a file share or into another feed.
+
+To run on your own Windows machine instead, register a self-hosted runner (repository **Settings → Actions → Runners → New self-hosted runner**) with the .NET 8 SDK, the .NET Framework 4.8 Developer Pack, PowerShell 7 (`pwsh`) and the GitHub CLI (`gh`). Then set the repository variable `SPKL_RUNS_ON` (**Settings → Secrets and variables → Actions → Variables**) to its labels as JSON, e.g. `["self-hosted","windows"]`. The same runner then builds pull requests too. If the repository is public, don't do that without requiring approval for workflows from forks (**Settings → Actions → General → Fork pull request workflows**), because anyone could run code on that machine through a pull request.
+
+### 3. GitLab
+
+#### Package registry
 
 Make sure the project's package registry is enabled (in the project settings under visibility / project features; the exact menu names depend on the GitLab version).
 
-### 2. Register a Windows runner
+#### Windows runner
 
 The pipeline needs Windows, because spkl targets .NET Framework 4.8.
 
@@ -39,25 +75,25 @@ If the tag is not `windows`, set the CI/CD variable `SPKL_RUNNER_TAG` (Settings 
 
 Optional: `SPKL_FEED_URL` pushes to another GitLab NuGet registry instead of the project's own, e.g. a group-level project. The default is `<gitlab>/api/v4/projects/<project id>/packages/nuget/index.json`, and the job pushes with its own job token, so no secret is needed.
 
-### 3. Publish the first version
+### 4. Publish the first version
 
 The repository is at version `1.0.0` (`<Version>` in `Directory.Build.props`).
 
 ```powershell
 git tag v1.0.0
-git push gitlab v1.0.0
+git push origin main v1.0.0
 ```
 
-The tag pipeline:
+This starts both tag pipelines. Each one:
 
-1. `build`: builds the test projects, runs the unit tests and runs `build/Pack.ps1`, which packs the three packages.
-2. `publish`: checks that the tag equals `v<Version>`, then pushes the packages to the registry. Pushing a version that already exists is skipped.
+1. builds the test projects, runs the unit tests and runs `build/Pack.ps1`, which packs the three packages (GitHub also builds a solution from the template against them),
+2. checks that the tag equals `v<Version>`, then pushes the packages to its feed. A version that already exists is skipped.
 
-Check the project's package registry (**Deploy → Package registry** in recent GitLab versions): `Spkl.OnPrem`, `Spkl.OnPrem.Attributes` and `Spkl.OnPrem.Templates` should be listed with `1.0.0`.
+Check both feeds: `Spkl.OnPrem`, `Spkl.OnPrem.Attributes` and `Spkl.OnPrem.Templates` should be listed with `1.0.0` on GitHub (**Packages**) and in GitLab (**Deploy → Package registry** in recent GitLab versions).
 
-### 4. Set up developer machines and solution pipelines
+### 5. Set up developer machines and solution pipelines
 
-See [NuGet feed on GitLab](nuget-feed.md): the feed URL, a token per developer, `nuget.config` in the solution repositories and restoring in their CI pipelines.
+See [NuGet feeds](nuget-feed.md): the feed URLs, a token per developer, `nuget.config` in the solution repositories and restoring in their CI pipelines on GitLab or GitHub.
 
 ## Releasing an update
 
@@ -77,16 +113,20 @@ Use [semantic versioning](https://semver.org): patch for fixes (`1.0.1`), minor 
 
 Merge the change on GitHub as usual. GitHub CI builds a solution from the template against the new packages, so a mismatch shows up there first.
 
-### 2. Tag and push to GitLab
+### 2. Tag and push to both
 
 ```powershell
 git checkout main
 git pull
 git tag v1.0.1
-git push gitlab main v1.0.1
+git push origin main v1.0.1
 ```
 
-A version can be published only once. To fix a broken release, raise the version again; don't move the tag.
+Both feeds must always hold the same build of a version number:
+
+- Tag once and push the same tag to both. Never publish a version on only one side on purpose.
+- If one pipeline fails for a reason outside the code (runner offline, registry down), re-run that pipeline for the same tag. Packages that were already pushed are skipped.
+- If the code is broken, raise the version again and tag the fix. Don't move or delete the tag, and don't delete a published version from one feed: a solution that already restored it would get a different package from the other feed.
 
 ### 3. Update existing solutions
 
@@ -102,7 +142,7 @@ Developers update the template itself with:
 dotnet new update
 ```
 
-## Packing without GitLab
+## Packing locally
 
 ```powershell
 .\build\Pack.ps1 -OutputDirectory .\artifacts

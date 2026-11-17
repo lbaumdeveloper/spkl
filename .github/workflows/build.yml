@@ -1,13 +1,22 @@
+# Builds and tests on every push to main and every pull request.
+# On a tag v<Version> it also pushes Spkl.OnPrem, Spkl.OnPrem.Attributes and Spkl.OnPrem.Templates
+# to GitHub Packages and attaches them to a GitHub release.
+# The repository variable SPKL_RUNS_ON selects another Windows runner, e.g. ["self-hosted","windows"]; the default is windows-latest.
+
 name: build
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ fromJSON(vars.SPKL_RUNS_ON || '"windows-latest"') }}
     defaults:
       run:
         working-directory: spkl
@@ -27,6 +36,12 @@ jobs:
         run: dotnet test SparkleXrm.Tasks.Tests --filter "TestCategory=Unit Tests"
       - name: Pack
         run: ..\build\Pack.ps1 -OutputDirectory "$env:RUNNER_TEMP\packages"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: ${{ runner.temp }}/packages/*.nupkg
+          if-no-files-found: error
+          retention-days: 7
       - name: Build a solution created from the template
         working-directory: ${{ runner.temp }}
         run: |
@@ -72,3 +87,45 @@ jobs:
           dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "$env:RUNNER_TEMP\packages" --NuGetConfig false --VsCodeTasks false
           if (Test-Path 'nuget.config') { throw 'nuget.config created despite --NuGetConfig false' }
           if (Test-Path '.vscode') { throw '.vscode created despite --VsCodeTasks false' }
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ fromJSON(vars.SPKL_RUNS_ON || '"windows-latest"') }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: ${{ runner.temp }}/packages
+      - name: Check tag against version
+        run: |
+          $version = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME does not match Version $version in Directory.Build.props" }
+      - name: Push to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $feed = "https://nuget.pkg.github.com/$env:GITHUB_REPOSITORY_OWNER/index.json"
+          foreach ($package in Get-ChildItem "$env:RUNNER_TEMP\packages" -Filter *.nupkg) {
+            dotnet nuget push $package.FullName --source $feed --api-key $env:GITHUB_TOKEN --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Attach to GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $packages = (Get-ChildItem "$env:RUNNER_TEMP\packages" -Filter *.nupkg).FullName
+          gh release view $env:GITHUB_REF_NAME *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:GITHUB_REF_NAME @packages --clobber
+          } else {
+            gh release create $env:GITHUB_REF_NAME @packages --title $env:GITHUB_REF_NAME --generate-notes --verify-tag
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

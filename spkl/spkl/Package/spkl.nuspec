@@ -8,8 +8,8 @@
     <copyright>Copyright (c) Scott Durow and contributors</copyright>
     <license type="expression">MIT</license>
     <icon>icon.png</icon>
-    <projectUrl>https://github.com/lbaumdeveloper/SparkleXrm</projectUrl>
-    <repository type="git" url="https://github.com/lbaumdeveloper/SparkleXrm" />
+    <projectUrl>https://github.com/lbaumdeveloper/spkl</projectUrl>
+    <repository type="git" url="https://github.com/lbaumdeveloper/spkl" />
     <description>Deployment task runner for Dynamics 365 v9 on-premises and online: plugins, workflow activities, web resources, early-bound types and solutions. Fork of spkl by Scott Durow.</description>
     <tags>dynamics-crm dynamics-365 on-premises spkl plugins deployment</tags>
     <developmentDependency>true</developmentDependency>
