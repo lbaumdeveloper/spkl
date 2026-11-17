@@ -19,7 +19,7 @@
 
 **Location**: spkl loads exactly one `spkl.json`: the one in the `path` you pass, or the file itself if `path` ends in `spkl.json`. Sub-folders are not searched.
 
-**Editor support**: add `"$schema": "https://raw.githubusercontent.com/lbaumdeveloper/SparkleXrm/master/docs/spkl.schema.json"` as the first property to get completion, descriptions and validation in VS Code and Visual Studio. The [template](../templates/solution/Tooling/spkl.json) already has it.
+**Editor support**: add `"$schema": "https://raw.githubusercontent.com/lbaumdeveloper/spkl/main/docs/spkl.schema.json"` as the first property to get completion, descriptions and validation in VS Code and Visual Studio. The [template](../templates/solution/Tooling/spkl.json) already has it.
 
 ### Profiles
 
