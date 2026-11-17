@@ -68,6 +68,7 @@ jobs:
           New-Item -ItemType Directory Existing | Out-Null
           cd Existing
           dotnet new sln -n Existing
+          $sln = (Get-ChildItem 'Existing.sln*' | Select-Object -First 1).Name
           dotnet new classlib -n Existing.Plugins -o Plugins -f netstandard2.0
           dotnet sln add Plugins\Existing.Plugins.csproj
           dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "$env:RUNNER_TEMP\packages"
@@ -79,7 +80,7 @@ jobs:
           if (Select-String -Path Tooling\spkl.json -Pattern '<SolutionUniqueName>' -SimpleMatch) { throw 'SolutionUniqueName was not replaced' }
           if (Select-String -Path nuget.config -Pattern '__FeedUrl__' -SimpleMatch) { throw 'FeedUrl was not replaced' }
           if (-not (dotnet sln list | Select-String 'Tooling.csproj' -SimpleMatch)) { throw 'Tooling was not added to the solution' }
-          dotnet build Existing.sln
+          dotnet build $sln
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cd ..
           New-Item -ItemType Directory NoExtras | Out-Null
