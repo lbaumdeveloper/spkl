@@ -10,7 +10,7 @@ spkl runs on Windows with .NET Framework 4.8 and supports Dynamics 365 v9 on-pre
 |---|---|---|
 | `Spkl.OnPrem` | `Tooling` only | `spkl.exe`; depends on `Microsoft.CrmSdk.CoreTools` (CrmSvcUtil, SolutionPackager) |
 | `Spkl.OnPrem.Attributes` | `Plugins`, `Actions`, `Workflows` | `CrmPluginRegistrationAttribute.cs` as source. Development dependency: nothing is added to the plugin's dependencies. |
-| `Spkl.OnPrem.Templates` | `dotnet new install` | The `spkl-solution` template |
+| `Spkl.OnPrem.Templates` | `dotnet new install` | The `spkl-solution` and `spkl-tooling` templates |
 
 The ids differ from the original `spkl` package on nuget.org on purpose, so restore never picks the original instead of this fork.
 
@@ -63,12 +63,7 @@ All paths in `spkl.json` are relative to the folder that contains `spkl.json`, w
 
 ### Existing solution
 
-Without the template:
-
-1. Copy `nuget.config`, `Tooling\spkl.json`, `Tooling\spkl.ps1`, `Tooling\New-SigningKey.ps1` and `.vscode\tasks.json` from [`templates/solution`](../templates/solution) and replace `__FeedUrl__`, `Contoso` and `<SolutionUniqueName>`.
-2. Install `Spkl.OnPrem` into one project only, e.g. `Tooling`.
-3. Install `Spkl.OnPrem.Attributes` into every plugin and workflow project. With `packages.config` the file is added to the project; with PackageReference it is compiled in without appearing in the project.
-4. Make sure the plugin assemblies are signed and `assemblypath` in `spkl.json` points to the built DLLs.
+To add spkl to a solution whose plugins and web resources are already registered, use `dotnet new spkl-tooling` instead and follow [existing solution](existing-solution.md).
 
 ## 3. Run commands
 

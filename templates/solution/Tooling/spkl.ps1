@@ -16,13 +16,21 @@ Folder spkl works in. Defaults to this folder, which holds spkl.json. The instru
 
 .PARAMETER DryRun
 plugins, workflow and webresources only: show what would be created, updated and deleted without writing anything.
+
+.PARAMETER Prefix
+get-webresources only: publisher prefix, e.g. new.
+
+.PARAMETER Overwrite
+download-webresources only: overwrite existing local files.
 #>
 param(
     [Parameter(Mandatory = $true)][string]$Task,
     [string]$Profile,
     [string]$Connection = $env:SPKL_CONNECTION,
     [string]$Path = $PSScriptRoot,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [string]$Prefix,
+    [switch]$Overwrite
 )
 
 $ErrorActionPreference = 'Stop'
@@ -56,6 +64,8 @@ $arguments = @($Task, (Resolve-Path $Path).Path)
 if ($Connection) { $arguments += $Connection }
 if ($Profile) { $arguments += "/p:$Profile" }
 if ($DryRun) { $arguments += '/dry-run' }
+if ($Prefix) { $arguments += "/s:$Prefix" }
+if ($Overwrite) { $arguments += '/o' }
 
 & $spkl @arguments
 exit $LASTEXITCODE

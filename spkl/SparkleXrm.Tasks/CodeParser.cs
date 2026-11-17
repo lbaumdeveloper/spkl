@@ -171,8 +171,12 @@ namespace SparkleXrm.Tasks
 
             var pos = _code.IndexOf(classLocation.Value);
 
-            // Find previouse line break
-            var lineBreak = _code.LastIndexOf("\r\n", pos - 1);
+            // Find the previous line break; works for CRLF and LF files
+            var lineBreak = _code.LastIndexOf('\n', pos - 1);
+            if (lineBreak > 0 && _code[lineBreak - 1] == '\r')
+            {
+                lineBreak--;
+            }
 
             // Indentation
             var indentation = _code.Substring(lineBreak, pos - lineBreak);

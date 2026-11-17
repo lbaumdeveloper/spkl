@@ -22,31 +22,18 @@ namespace SparkleXrm.Tasks
         protected override void ExecuteInternal(string filePath, OrganizationServiceContext ctx)
         {
             _trace.WriteLine("Searching for classes in '{0}'", filePath);
-            var targetFolder = new DirectoryInfo(filePath);
             var matches = ServiceLocator.DirectoryService.Search(filePath, "*.cs");
 
             if (matches == null)
                 return;
 
-            var pluginRegistration = new PluginRegistraton(_service, ctx, _trace);
+            var customClassRegex = GetCustomClassRegex(filePath);
             int codeFilesUpdated = 0;
-
-            // Create a spkl.json file here (or load an existing one)
-            var files = ServiceLocator.ConfigFileFactory.FindConfig(filePath, false);
-            var file = files[0];
 
             foreach (var codeFile in matches)
             {
                 try
                 {
-                    string customClassRegex = null;
-                    // Support for custom base class regex 
-                    var profile = file.GetPluginsConfig(this.Profile);
-                    if (profile != null && profile.Length > 0 && !String.IsNullOrEmpty(profile[0].classRegex))
-                    {
-                        customClassRegex = profile[0].classRegex;
-                    }
-
                     // Find if it contains any plugin/workflow classes
                     CodeParser parser = new CodeParser(new Uri(codeFile), customClassRegex);
 
@@ -83,24 +70,20 @@ namespace SparkleXrm.Tasks
                     throw new Exception(ex.LoaderExceptions.First().Message);
                 }
             }
-            _trace.WriteLine("{0} classes decorated with deployment attributes!", codeFilesUpdated);
+            _trace.WriteLine("{0} files decorated with deployment attributes.", codeFilesUpdated);
+        }
 
-
-            if (file.plugins == null)
-            {
-                file.plugins = new List<PluginDeployConfig>();
-            }
-
-            if (file.plugins.Where(a => a.assemblypath == @"bin\Debug").FirstOrDefault() == null)
-            {
-                file.plugins.Add(new PluginDeployConfig()
-                {
-                    assemblypath = @"bin\Debug"
-                });
-            }
-
-            file.filePath = filePath;
-            file.Save();
+        /// <summary>
+        /// Returns the classRegex of the first plugins entry in a spkl.json inside the scanned folder, if there is one.
+        /// instrument never writes spkl.json; deployment settings live in the solution's single spkl.json.
+        /// </summary>
+        private string GetCustomClassRegex(string filePath)
+        {
+            var config = ServiceLocator.ConfigFileFactory.FindConfig(filePath, false)[0];
+            var profile = config.GetPluginsConfig(this.Profile);
+            return profile != null && profile.Length > 0 && !String.IsNullOrEmpty(profile[0].classRegex)
+                ? profile[0].classRegex
+                : null;
         }
 
         private void AddWorkflowActivityAttributes(OrganizationServiceContext ctx, CodeParser parser, string pluginType)

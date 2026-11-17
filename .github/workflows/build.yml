@@ -47,3 +47,28 @@ jobs:
             if (-not $token -or $token.Length -eq 0) { throw "$assembly is not strong-named" }
             if (-not [System.Reflection.Assembly]::LoadFile((Resolve-Path $assembly).Path).GetType('CrmPluginRegistrationAttribute')) { throw "$assembly does not contain CrmPluginRegistrationAttribute" }
           }
+      - name: Add the Tooling to an existing solution
+        working-directory: ${{ runner.temp }}
+        run: |
+          New-Item -ItemType Directory Existing | Out-Null
+          cd Existing
+          dotnet new sln -n Existing
+          dotnet new classlib -n Existing.Plugins -o Plugins -f netstandard2.0
+          dotnet sln add Plugins\Existing.Plugins.csproj
+          dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "$env:RUNNER_TEMP\packages"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($file in 'Tooling\Tooling.csproj', 'Tooling\spkl.json', 'Tooling\spkl.ps1', '.vscode\tasks.json', 'nuget.config') {
+            if (-not (Test-Path $file)) { throw "$file was not created" }
+          }
+          if (Test-Path 'Directory.Build.props') { throw 'spkl-tooling must not add Directory.Build.props' }
+          if (Select-String -Path Tooling\spkl.json -Pattern '<SolutionUniqueName>' -SimpleMatch) { throw 'SolutionUniqueName was not replaced' }
+          if (Select-String -Path nuget.config -Pattern '__FeedUrl__' -SimpleMatch) { throw 'FeedUrl was not replaced' }
+          if (-not (dotnet sln list | Select-String 'Tooling.csproj' -SimpleMatch)) { throw 'Tooling was not added to the solution' }
+          dotnet build Existing.sln
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cd ..
+          New-Item -ItemType Directory NoExtras | Out-Null
+          cd NoExtras
+          dotnet new spkl-tooling --SolutionUniqueName ContosoCore --FeedUrl "$env:RUNNER_TEMP\packages" --NuGetConfig false --VsCodeTasks false
+          if (Test-Path 'nuget.config') { throw 'nuget.config created despite --NuGetConfig false' }
+          if (Test-Path '.vscode') { throw '.vscode created despite --VsCodeTasks false' }

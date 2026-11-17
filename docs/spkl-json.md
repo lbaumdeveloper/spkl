@@ -45,7 +45,7 @@ Used by `plugins`, `workflow` and `instrument`.
 | `assemblypath` | string | **required** | DLL(s) to register. See [assembly paths](#assembly-paths). |
 | `solution` | string | **required** | Unique name of the solution the assembly, types and steps are added to. spkl stops with an error if it is missing, so nothing is deployed to the default solution. |
 | `excludePluginSteps` | bool | `false` | Register assembly and types only, no steps. Same as `/e`. |
-| `classRegex` | string | see below | `instrument` only: regex that finds plugin and workflow classes in `.cs` files. Change it if your plugins inherit from a base class not named `PluginBase` or `Plugin`. |
+| `classRegex` | string | see below | `instrument` only: regex that finds plugin and workflow classes in `.cs` files. Change it if your plugins inherit from a base class whose name does not start with `Plugin`. `instrument` reads it from a `spkl.json` in the scanned folder, not from `Tooling\spkl.json`. |
 
 ### Assembly paths
 

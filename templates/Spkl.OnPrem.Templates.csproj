@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Packs the solution folder as a "dotnet new" template; nothing is compiled. -->
+  <!-- Packs the "dotnet new" templates spkl-solution and spkl-tooling; nothing is compiled. -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Spkl.OnPrem.Templates</PackageId>
     <PackageType>Template</PackageType>
-    <Title>spkl solution template</Title>
-    <Description>dotnet new spkl-solution: a Dynamics 365 solution with Plugins, Actions, Workflows, Helper, Webresources and Tooling projects, deployed with spkl.</Description>
+    <Title>spkl templates</Title>
+    <Description>dotnet new spkl-solution: a Dynamics 365 solution with Plugins, Actions, Workflows, Helper, Webresources and Tooling projects, deployed with spkl. dotnet new spkl-tooling: adds only the spkl Tooling project to an existing solution.</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IncludeContentInPack>true</IncludeContentInPack>
     <ContentTargetFolders>content</ContentTargetFolders>
@@ -16,5 +16,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="solution\**\*" Exclude="solution\**\bin\**;solution\**\obj\**;solution\**\.vs\**" CopyToOutputDirectory="Never" />
+    <Content Include="tooling\**\*" Exclude="tooling\**\bin\**;tooling\**\obj\**;tooling\**\.vs\**" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  <!-- spkl-tooling shares these files with spkl-solution, so they are maintained once. -->
+  <ItemGroup>
+    <None Include="solution\nuget.config" Pack="true" PackagePath="content\tooling\" />
+    <None Include="solution\.vscode\tasks.json" Pack="true" PackagePath="content\tooling\.vscode\" />
+    <None Include="solution\Tooling\Tooling.csproj;solution\Tooling\spkl.ps1" Pack="true" PackagePath="content\tooling\Tooling\" />
   </ItemGroup>
 </Project>

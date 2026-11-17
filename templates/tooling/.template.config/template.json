@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "lbaumdeveloper",
+  "classifications": ["Dynamics 365", "Plugins", "spkl"],
+  "identity": "Spkl.OnPrem.Tooling",
+  "name": "spkl Tooling for an existing solution",
+  "description": "Adds only the spkl Tooling project (spkl.json, spkl.ps1), VS Code tasks and nuget.config to an existing Visual Studio solution. Run it in the folder that contains the .sln.",
+  "shortName": "spkl-tooling",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "SolutionUniqueName": {
+      "type": "parameter",
+      "datatype": "string",
+      "isRequired": true,
+      "replaces": "<SolutionUniqueName>",
+      "description": "Unique name of the Dynamics 365 solution your plugins and web resources already belong to. Never the default solution."
+    },
+    "FeedUrl": {
+      "type": "parameter",
+      "datatype": "string",
+      "isRequired": true,
+      "replaces": "__FeedUrl__",
+      "description": "NuGet source of the Spkl.OnPrem packages, e.g. https://gitlab.contoso.local/api/v4/projects/42/packages/nuget/index.json. Written to nuget.config without credentials."
+    },
+    "NuGetConfig": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Create nuget.config. Use false if the solution already has one and add the spkl source to it yourself."
+    },
+    "VsCodeTasks": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Create .vscode/tasks.json. Use false if the solution already has one and copy the spkl tasks into it yourself."
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        { "exclude": [ "**/bin/**", "**/obj/**", "**/.vs/**" ] },
+        { "condition": "(!NuGetConfig)", "exclude": [ "nuget.config" ] },
+        { "condition": "(!VsCodeTasks)", "exclude": [ ".vscode/**" ] }
+      ]
+    }
+  ],
+  "primaryOutputs": [
+    { "path": "Tooling/Tooling.csproj" }
+  ],
+  "postActions": [
+    {
+      "description": "Add the Tooling project to the solution in this folder.",
+      "manualInstructions": [ { "text": "Run 'dotnet sln add Tooling/Tooling.csproj' in the folder that contains the .sln." } ],
+      "actionId": "D396686C-DE0E-4DE6-906D-291CD29FC5DE",
+      "args": {
+        "primaryOutputIndexes": "0"
+      },
+      "continueOnError": true
+    }
+  ]
+}

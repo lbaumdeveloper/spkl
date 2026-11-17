@@ -247,6 +247,25 @@ namespace SparkleXrm.Tasks.Tests
 
         [TestMethod]
         [TestCategory("Unit Tests")]
+        public void AddAttributeToFileWithLfLineEndings()
+        {
+            var code = "namespace Contoso.Plugins\n{\n    public class AccountPreCreate : IPlugin\n    {\n    }\n}\n";
+            var parser = new CodeParser(code);
+            var attribute = new CrmPluginRegistrationAttribute(
+                MessageNameEnum.Create, "account", StageEnum.PreOperation, ExecutionModeEnum.Synchronous,
+                "", "Create of account", 1, IsolationModeEnum.Sandbox);
+
+            parser.AddAttribute(attribute, "Contoso.Plugins.AccountPreCreate");
+
+            Assert.IsFalse(parser.Code.Contains("\r"), "No CR added to an LF file");
+            Assert.IsTrue(parser.Code.Contains("\n    [CrmPluginRegistration(\"Create\""), "Attribute inserted on its own line");
+            Assert.IsTrue(parser.Code.Contains(")]\n    public class AccountPreCreate : IPlugin"), "Attribute directly above the class");
+            Assert.AreEqual(1, parser.RemoveExistingAttributes());
+            Assert.AreEqual(code, parser.Code);
+        }
+
+        [TestMethod]
+        [TestCategory("Unit Tests")]
         public void ParsePluginCodeWithCustomBaseClass()
         {
             string regex = @"((public( sealed)? class (?'class'[\w]*)[\W]*?)((?'plugin':[\W]*?((IPlugin)|(PluginBase)|(Plugin)))|(?'wf':[\W]*?((CodeActivity)|(WorkFlowActivityBase)))))";
